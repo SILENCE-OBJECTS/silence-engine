@@ -1,0 +1,11 @@
+{
+  "name": "@silence/engine",
+  "version": "0.1.0-mvp",
+  "license": "MIT",
+  "description": "Deterministic scheduler. Cargo.lock is SSoT.",
+  "files": ["Cargo.toml", "Cargo.lock", "src/", "README.md"],
+  "scripts": {
+    "test": "cargo test --locked",
+    "build": "cargo build --release --locked"
+  }
+}

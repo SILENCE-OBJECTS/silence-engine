@@ -1,0 +1,16 @@
+name: ci-locked
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  locked:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: lockfile required
+        run: test -f Cargo.lock
+      - run: cargo test --locked --lib

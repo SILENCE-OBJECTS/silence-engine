@@ -1,0 +1,5 @@
+# SILENCE-OBJECTS / silence-engine
+
+Deterministic phi-timing scheduler. MIT. Cargo.lock pinned.
+Do-not: 03_ee, raw streams, floating-point in the hot path, OS entropy.
+Cite: README.md, Cargo.toml, Cargo.lock, src/lib.rs
