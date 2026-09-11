@@ -124,3 +124,75 @@ impl fmt::Display for ValidationError {
 impl core::error::Error for ValidationError {}
 pub fn compute_batch(inputs: &[EngineInput]) -> Vec<EngineOutput> { inputs.iter().map(compute_schedule).collect() }
 pub fn verify_determinism(inputs: &[EngineInput]) -> bool { compute_batch(inputs) == compute_batch(inputs) }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn fixture() -> EngineInput {
+        EngineInput {
+            observer: *b"SILENCE.OBJECT01",
+            timestamp_ms: 1_618_000_000_000,
+            attention_depth: AttentionDepth::Moderate,
+            last_signal_ms: None,
+            entropy: *b"PHI_LOCK",
+        }
+    }
+
+    #[test]
+    fn schedule_is_bitwise_deterministic() {
+        let a = compute_schedule(&fixture());
+        let b = compute_schedule(&fixture());
+        assert_eq!(a, b);
+        assert!(verify_determinism(&[fixture()]));
+    }
+
+    #[test]
+    fn output_validates_against_input() {
+        let input = fixture();
+        let out = compute_schedule(&input);
+        assert_eq!(validate_output(&input, &out), Ok(()));
+        assert_eq!(out.slots.len(), MAX_SLOTS_PER_CYCLE);
+    }
+
+    #[test]
+    fn interval_shrinks_with_depth() {
+        let mut prev = u64::MAX;
+        for raw in 1..=5u8 {
+            let depth = AttentionDepth::from_raw(raw).unwrap();
+            let interval = compute_interval_ms(depth);
+            assert!(interval > 0);
+            assert!(interval < prev);
+            prev = interval;
+            assert!(interval * MAX_SLOTS_PER_CYCLE as u64 <= MAX_SCHEDULE_SPAN_MS);
+        }
+    }
+
+    #[test]
+    fn golden_input_hash_pinned() {
+        let hash = compute_input_hash(&fixture());
+        assert_eq!(
+            hash,
+            [
+                0xbd, 0xaf, 0x40, 0x08, 0x34, 0x50, 0xdd, 0xde,
+                0x08, 0xd2, 0x1c, 0x70, 0xab, 0x72, 0xb6, 0xe0,
+                0xae, 0x99, 0xcc, 0x8c, 0x7a, 0x94, 0xec, 0x59,
+                0xb5, 0xb4, 0x90, 0x97, 0x75, 0x29, 0x94, 0x5f,
+            ]
+        );
+    }
+
+    #[test]
+    fn reject_tampered_output_hash() {
+        let input = fixture();
+        let mut out = compute_schedule(&input);
+        out.output_hash[0] ^= 0xff;
+        assert_eq!(validate_output(&input, &out), Err(ValidationError::OutputHashMismatch));
+    }
+
+    #[test]
+    fn reject_unknown_attention_depth() {
+        assert_eq!(AttentionDepth::from_raw(0), None);
+        assert_eq!(AttentionDepth::from_raw(6), None);
+    }
+}

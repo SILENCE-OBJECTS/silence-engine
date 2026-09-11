@@ -9,6 +9,7 @@ license = "MIT"
 repository = "https://github.com/SILENCE-OBJECTS/silence-engine"
 
 [dependencies]
+# Pinned exact versions. Cargo.lock is SSoT. Do not freeze without this file.
 sha2 = "=0.10.8"
 wasm-bindgen = { version = "=0.2.92", optional = true }
 js-sys = { version = "=0.3.69", optional = true }

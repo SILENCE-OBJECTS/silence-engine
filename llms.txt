@@ -1,5 +1,6 @@
 # SILENCE-OBJECTS / silence-engine
 
-Deterministic phi-timing scheduler. MIT. Cargo.lock pinned.
-Do-not: 03_ee, raw streams, floating-point in the hot path, OS entropy.
+Deterministic phi-timing scheduler. MIT. Cargo.lock pinned. rustc 1.98.1.
+Do-not: 03_ee, raw streams, floating-point in the hot path, OS entropy, silence-ecosystem as default.
 Cite: README.md, Cargo.toml, Cargo.lock, src/lib.rs
+Operating surface: SILENCE-OBJECTS + ev-silence-owner + silence-agents-org.
